@@ -3,7 +3,6 @@ package main
 import (
 	_ "embed"
 	"fmt"
-	"strconv"
 	"strings"
 	"unicode"
 
@@ -12,7 +11,8 @@ import (
 
 var (
 	//go:embed input
-	input string
+	input     string
+	notdigits []string = []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
 )
 
 func main() {
@@ -46,12 +46,7 @@ func calibrationValueForLine(line string) int {
 	firstIdx := strings.IndexFunc(line, unicode.IsNumber)
 	lastIdx := strings.LastIndexFunc(line, unicode.IsNumber)
 
-	res, err := strconv.ParseInt(fmt.Sprintf("%c%c", line[firstIdx], line[lastIdx]), 10, 0)
-	if err != nil {
-		panic(err)
-	}
-
-	return int(res)
+	return 10*int(line[firstIdx]-'0') + int(line[lastIdx]-'0')
 }
 
 func calibrationValueForLinePart2(line string) int {
@@ -59,42 +54,36 @@ func calibrationValueForLinePart2(line string) int {
 		return 0
 	}
 
-	firstIdx := len(line)
-	firstVal := 0
-	lastIdx := -1
-	lastVal := 0
+	return 10*firstDigit(line) + lastDigit(line)
+}
 
-	firstIdxLiteral := strings.IndexFunc(line, unicode.IsNumber)
-	if firstIdxLiteral >= 0 {
-		firstIdx = firstIdxLiteral
-		firstValTemp, err := strconv.ParseInt(string(line[firstIdxLiteral]), 10, 0)
-		if err != nil {
-			panic(err)
+func firstDigit(line string) int {
+	for i := 0; i < len(line); i++ {
+		r := rune(line[i])
+		if unicode.IsNumber(r) {
+			return int(r - '0')
 		}
-		firstVal = int(firstValTemp)
-	}
-	lastIdxLiteral := strings.LastIndexFunc(line, unicode.IsNumber)
-	if lastIdxLiteral >= 0 {
-		lastIdx = lastIdxLiteral
-		lastValTemp, err := strconv.ParseInt(string(line[lastIdxLiteral]), 10, 0)
-		if err != nil {
-			panic(err)
-		}
-		lastVal = int(lastValTemp)
-	}
-	for i, thesearentdigits := range []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"} {
-		firstIdxNotDigit := strings.Index(line, thesearentdigits)
-		if firstIdxNotDigit >= 0 && firstIdxNotDigit < firstIdx {
-			firstIdx = firstIdxNotDigit
-			firstVal = i + 1
-		}
-
-		lastIdxNotDigit := strings.LastIndex(line, thesearentdigits)
-		if lastIdxNotDigit >= 0 && lastIdxNotDigit > lastIdx {
-			lastIdx = lastIdxNotDigit
-			lastVal = i + 1
+		for digitIdx, phrase := range notdigits {
+			if strings.Index(line, phrase) == i {
+				return digitIdx + 1
+			}
 		}
 	}
+	return 0
+}
 
-	return 10*firstVal + lastVal
+func lastDigit(line string) int {
+	for i := len(line) - 1; i >= 0; i-- {
+		r := rune(line[i])
+		if unicode.IsNumber(r) {
+			return int(r - '0')
+		}
+		for digitIdx, phrase := range notdigits {
+			idxOfPhrase := strings.LastIndex(line, phrase)
+			if idxOfPhrase+len(phrase)-1 == i {
+				return digitIdx + 1
+			}
+		}
+	}
+	return 0
 }
