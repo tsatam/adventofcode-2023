@@ -30,15 +30,13 @@ func main() {
 func handlePart1(input string) int {
 	games := readInput(input)
 	possibleGames := fp.Filter(games, isGamePossible)
-	return fp.Reduce(possibleGames, 0, func(curr int, next Game) int {
-		return curr + next.id
-	})
+	return fp.SumFrom(possibleGames, func(g Game) int { return g.id })
 }
 
 func handlePart2(input string) int {
 	games := readInput(input)
 	powers := fp.Map(games, gamePower)
-	return fp.Reduce(powers, 0, func(curr, next int) int { return curr + next })
+	return fp.Sum(powers)
 }
 
 func readInput(input string) []Game {

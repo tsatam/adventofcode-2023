@@ -23,14 +23,14 @@ func main() {
 func handlePart1(input string) int {
 	lines := readInput(input)
 	calibrationValues := fp.Map(lines, calibrationValueForLine)
-	sum := fp.Reduce(calibrationValues, 0, func(curr, next int) int { return curr + next })
+	sum := fp.Sum(calibrationValues)
 	return sum
 }
 
 func handlePart2(input string) int {
 	lines := readInput(input)
 	calibrationValues := fp.Map(lines, calibrationValueForLinePart2)
-	sum := fp.Reduce(calibrationValues, 0, func(curr, next int) int { return curr + next })
+	sum := fp.Sum(calibrationValues)
 	return sum
 }
 
