@@ -24,15 +24,21 @@ type Round struct {
 
 func main() {
 	fmt.Printf("Part 1: %d\n", handlePart1(input))
+	fmt.Printf("Part 2: %d\n", handlePart2(input))
 }
 
 func handlePart1(input string) int {
 	games := readInput(input)
 	possibleGames := fp.Filter(games, isGamePossible)
-	idSums := fp.Reduce(possibleGames, 0, func(curr int, next Game) int {
+	return fp.Reduce(possibleGames, 0, func(curr int, next Game) int {
 		return curr + next.id
 	})
-	return idSums
+}
+
+func handlePart2(input string) int {
+	games := readInput(input)
+	powers := fp.Map(games, gamePower)
+	return fp.Reduce(powers, 0, func(curr, next int) int { return curr + next })
 }
 
 func readInput(input string) []Game {
@@ -86,4 +92,22 @@ func isGamePossible(g Game) bool {
 		}
 	}
 	return true
+}
+
+func gamePower(g Game) int {
+	minCubes := fp.Reduce(g.rounds, Round{}, func(curr, next Round) Round {
+		if curr.red < next.red {
+			curr.red = next.red
+		}
+		if curr.green < next.green {
+			curr.green = next.green
+		}
+		if curr.blue < next.blue {
+			curr.blue = next.blue
+		}
+
+		return curr
+	})
+
+	return minCubes.red * minCubes.green * minCubes.blue
 }
