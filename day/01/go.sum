@@ -1,2 +1,2 @@
-golang.org/x/text v0.14.0 h1:ScX5w1eTa3QqT8oi6+ziP7dTV1S2+ALU0bI+0zXKWiQ=
-golang.org/x/text v0.14.0/go.mod h1:18ZOQIKpY8NJVqYksKHtTdi31H5itFRjB5/qKTNYzSU=
+github.com/tsatam/adventofcode-2023/common v0.0.0-20231201121155-382d6789962a h1:WO/+rQl4zLE50XLqF8F66Raw+6vAa7bj2/3n4rCn8jQ=
+github.com/tsatam/adventofcode-2023/common v0.0.0-20231201121155-382d6789962a/go.mod h1:ST4BrghZAoSg4WllRz9GhSZZAfFeDImC8co617PSMr8=

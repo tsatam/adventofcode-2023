@@ -19,7 +19,7 @@ func TestMapEmptyReturnsEmpty(t *testing.T) {
 	}
 }
 
-func TestStringToInt(t *testing.T) {
+func TestMapStringToInt(t *testing.T) {
 	in := []string{"lorem", "ipsum", "dolor", "sit", "amet"}
 	mapper := func(t string) int {
 		return len(t)
