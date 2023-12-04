@@ -22,12 +22,38 @@ type Card struct {
 
 func main() {
 	fmt.Printf("Part 1: %d\n", handlePart1(input))
+	fmt.Printf("Part 2: %d\n", handlePart2(input))
 }
 
 func handlePart1(input string) int {
 	cards := readInput(input)
 	scores := fp.Map(cards, cardScore)
 	return fp.Sum(scores)
+}
+
+func handlePart2(input string) int {
+	cards := readInput(input)
+
+	countProcessed := 0
+	toProcessCount := make([]int, len(cards))
+
+	for i, _ := range cards {
+		toProcessCount[i] = 1
+	}
+
+	for i := 0; i < len(cards); i++ {
+		card := cards[i]
+		count := toProcessCount[i]
+
+		countProcessed += count
+
+		matches := cardMatches(card)
+		for j := 1; j <= matches; j++ {
+			toProcessCount[i+j] += count
+		}
+	}
+
+	return countProcessed
 }
 
 func readInput(input string) []Card {
@@ -58,20 +84,29 @@ func readCard(line string) Card {
 	}
 }
 
-func cardScore(card Card) int {
-	score := 0
+func cardMatches(card Card) int {
+	matches := 0
 	winning := make(map[int]struct{}, len(card.winning))
 	for _, w := range card.winning {
 		winning[w] = struct{}{}
 	}
 	for _, n := range card.numbers {
 		if _, ok := winning[n]; ok {
-			if score == 0 {
-				score = 1
-			} else {
-				score *= 2
-			}
+			matches++
 		}
+	}
+	return matches
+
+}
+
+func cardScore(card Card) int {
+	matches := cardMatches(card)
+	if matches == 0 {
+		return 0
+	}
+	score := 1
+	for i := 1; i < matches; i++ {
+		score *= 2
 	}
 	return score
 }
