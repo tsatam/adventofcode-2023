@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -26,12 +27,37 @@ type AlmanacMap struct {
 
 func main() {
 	fmt.Printf("Part 1: %d\n", handlePart1(input))
+	fmt.Printf("Part 2: %d\n", handlePart2(input))
 }
 
 func handlePart1(input string) int {
 	almanac := readInput(input)
 	seeds := seedsToLocations(almanac)
 	return slices.Min(seeds)
+}
+
+func handlePart2(input string) int {
+	almanac := readInput(input)
+
+	for location := 0; location < math.MaxInt; location++ { // keep going until we either find a valid location or melt my computer
+		eventualSeed := location
+
+		for i := len(almanac.maps) - 1; i >= 0; i-- {
+			for _, m := range almanac.maps[i] {
+				if eventualSeed >= m.dest && eventualSeed < m.dest+m.rng {
+					diff := eventualSeed - m.dest
+					eventualSeed = m.source + diff
+					break
+				}
+			}
+		}
+
+		if seedInSeedRange(eventualSeed, almanac) {
+			return location
+		}
+	}
+	// my computer is on fire, maybe the elves will find the water to put it out
+	return math.MaxInt
 }
 
 func readInput(input string) Almanac {
@@ -60,12 +86,12 @@ func readInput(input string) Almanac {
 }
 
 func seedsToLocations(almanac Almanac) []int {
-	return fp.Map(almanac.seeds, func(seed int) int {
+	return fp.MapParallel(almanac.seeds, func(seed int) int {
 		location := seed
 
 		for _, m := range almanac.maps {
 			for _, c := range m {
-				if location >= c.source && location < c.source+c.rng {
+				if c.source <= location && location < c.source+c.rng {
 					diff := location - c.source
 					location = c.dest + diff
 					break
@@ -75,6 +101,16 @@ func seedsToLocations(almanac Almanac) []int {
 
 		return location
 	})
+}
+
+func seedInSeedRange(seed int, a Almanac) bool {
+	for i := 0; i < len(a.seeds); i += 2 {
+		if a.seeds[i] <= seed && seed < a.seeds[i]+a.seeds[i+1] {
+			return true
+		}
+	}
+
+	return false
 }
 
 func parseInt(raw string) int {
