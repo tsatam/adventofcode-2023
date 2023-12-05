@@ -37,7 +37,7 @@ func handlePart2(input string) int {
 	countProcessed := 0
 	toProcessCount := make([]int, len(cards))
 
-	for i, _ := range cards {
+	for i := range cards {
 		toProcessCount[i] = 1
 	}
 
