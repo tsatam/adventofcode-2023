@@ -42,11 +42,14 @@ func handlePart2(input string) int {
 	for location := 0; location < math.MaxInt; location++ { // keep going until we either find a valid location or melt my computer
 		eventualSeed := location
 
-		for i := len(almanac.maps) - 1; i >= 0; i-- {
-			for _, m := range almanac.maps[i] {
-				if eventualSeed >= m.dest && eventualSeed < m.dest+m.rng {
-					diff := eventualSeed - m.dest
-					eventualSeed = m.source + diff
+		reversedMaps := slices.Clone(almanac.maps)
+		slices.Reverse(reversedMaps)
+
+		for _, m := range reversedMaps {
+			for _, c := range m {
+				if eventualSeed >= c.dest && eventualSeed < c.dest+c.rng {
+					diff := eventualSeed - c.dest
+					eventualSeed = c.source + diff
 					break
 				}
 			}
