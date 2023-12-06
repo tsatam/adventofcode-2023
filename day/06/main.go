@@ -22,12 +22,18 @@ type Race struct {
 
 func main() {
 	fmt.Printf("Part 1: %d\n", handlePart1(input))
+	fmt.Printf("Part 2: %d\n", handlePart2(input))
 }
 
 func handlePart1(input string) int {
 	races := readInput(input)
 	solutions := fp.Map(races, solveRace)
 	return fp.Reduce(solutions, 1, func(curr, next int) int { return curr * next })
+}
+
+func handlePart2(input string) int {
+	race := readInputPart2(input)
+	return solveRace(race)
 }
 
 func readInput(input string) []Race {
@@ -50,6 +56,24 @@ func readInput(input string) []Race {
 	}
 
 	return races
+}
+
+func readInputPart2(input string) Race {
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+
+	entries := fp.Map(
+		lines,
+		func(l string) int {
+			processed := string(fp.Filter([]rune(l), func(it rune) bool { return it != ' ' }))
+			split := strings.Split(processed, ":")
+			return parseInt(split[1])
+		},
+	)
+
+	return Race{
+		time:     entries[0],
+		distance: entries[1],
+	}
 }
 
 func solveRace(r Race) int {

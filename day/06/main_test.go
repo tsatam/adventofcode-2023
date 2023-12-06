@@ -18,6 +18,18 @@ Distance:  9  40  200
 	}
 }
 
+func TestHandlePart2(t *testing.T) {
+	input := `Time:      7  15   30
+Distance:  9  40  200
+`
+	want := 71503
+	got := handlePart2(input)
+
+	if got != want {
+		t.Errorf("got %d, want %d", got, want)
+	}
+}
+
 func TestReadInput(t *testing.T) {
 	input := `Time:      7  15   30
 Distance:  9  40  200
@@ -29,6 +41,19 @@ Distance:  9  40  200
 	}
 
 	got := readInput(input)
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestReadInputPart2(t *testing.T) {
+	input := `Time:      7  15   30
+Distance:  9  40  200
+`
+	want := Race{time: 71530, distance: 940200}
+
+	got := readInputPart2(input)
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
