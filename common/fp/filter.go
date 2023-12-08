@@ -9,3 +9,12 @@ func Filter[T any](in []T, predicate func(it T) bool) []T {
 	}
 	return result
 }
+
+func AllMatch[T any](in []T, predicate func(it T) bool) bool {
+	for _, item := range in {
+		if !predicate(item) {
+			return false
+		}
+	}
+	return true
+}

@@ -1,9 +1,14 @@
 package main
 
 import (
+	"cmp"
 	_ "embed"
 	"fmt"
+	"math"
+	"slices"
 	"strings"
+
+	"github.com/tsatam/adventofcode-2023/common/fp"
 )
 
 var (
@@ -22,6 +27,7 @@ type Node struct {
 
 func main() {
 	fmt.Printf("Part 1: %d\n", handlePart1(input))
+	fmt.Printf("Part 2: %d\n", handlePart2(input))
 }
 
 func handlePart1(input string) int {
@@ -39,6 +45,63 @@ func handlePart1(input string) int {
 		}
 
 		if currentNode == "ZZZ" {
+			return i + 1
+		}
+	}
+	return -1
+}
+
+func handlePart2(input string) int {
+	networkMap := readInput(input)
+
+	currentNodes := []string{}
+	for name := range networkMap.nodes {
+		if name[2] == 'A' {
+			currentNodes = append(currentNodes, name)
+		}
+	}
+
+	type Cycle struct {
+		// c + nx => Z for all n
+		c, x int
+	}
+
+	allCycles := fp.MapParallel(currentNodes, func(currentNode string) Cycle {
+		first, second := -1, -1
+		for i := 0; true; i++ {
+			instruction := networkMap.instructions[i%len(networkMap.instructions)]
+			nodePath := networkMap.nodes[currentNode]
+			switch instruction {
+			case 'L':
+				currentNode = nodePath.left
+			case 'R':
+				currentNode = nodePath.right
+			}
+
+			if currentNode[2] == 'Z' {
+				if first == -1 {
+					first = i
+					continue
+				}
+				second = i
+				break
+			}
+		}
+
+		return Cycle{
+			c: first,
+			x: second - first,
+		}
+	})
+
+	largestCycle := slices.MaxFunc(allCycles, func(a, b Cycle) int {
+		return cmp.Compare(a.x, b.x)
+	})
+
+	for i := largestCycle.c; i < math.MaxInt; i += largestCycle.x {
+		if fp.AllMatch(allCycles, func(it Cycle) bool {
+			return (i-it.c)%it.x == 0
+		}) {
 			return i + 1
 		}
 	}
