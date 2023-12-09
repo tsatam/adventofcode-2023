@@ -16,12 +16,20 @@ var (
 
 func main() {
 	fmt.Printf("Part 1: %d\n", handlePart1(input))
+	fmt.Printf("Part 2: %d\n", handlePart2(input))
 }
 
 func handlePart1(input string) int {
 	lines := readInput(input)
 	histories := fp.Map(lines, lineToHistory)
 	extrapolated := fp.Map(histories, extrapolateHistory)
+	return fp.Sum(extrapolated)
+}
+
+func handlePart2(input string) int {
+	lines := readInput(input)
+	histories := fp.Map(lines, lineToHistory)
+	extrapolated := fp.Map(histories, extrapolateHistoryBackwards)
 	return fp.Sum(extrapolated)
 }
 
@@ -60,6 +68,14 @@ func extrapolateHistory(history [][]int) int {
 		history[i] = append(history[i], history[i][len(history[i])-1]+history[i+1][len(history[i+1])-1])
 	}
 	return history[0][len(history[0])-1]
+}
+
+func extrapolateHistoryBackwards(history [][]int) int {
+	history[len(history)-1] = append([]int{0}, history[len(history)-1]...)
+	for i := len(history) - 2; i >= 0; i-- {
+		history[i] = append([]int{history[i][0] - history[i+1][0]}, history[i]...)
+	}
+	return history[0][0]
 }
 
 func parseInt(raw string) int {
