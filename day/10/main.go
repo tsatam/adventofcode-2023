@@ -17,6 +17,7 @@ var (
 
 func main() {
 	fmt.Printf("Part 1: %d\n", handlePart1(input))
+	fmt.Printf("Part 2: %d\n", handlePart2(input))
 }
 
 func handlePart1(input string) int {
@@ -29,6 +30,23 @@ func handlePart1(input string) int {
 			return nextMax
 		}
 		return curr
+	})
+}
+
+func handlePart2(input string) int {
+	pipemap := readInput(input)
+	distances := findDistances(pipemap)
+
+	distances = fillOutsideEmpty(distances)
+
+	return fp.Reduce(distances, 0, func(curr int, next []int) int {
+		countNext := fp.Reduce(next, 0, func(curr, next int) int {
+			if next == -1 {
+				return curr + 1
+			}
+			return curr
+		})
+		return curr + countNext
 	})
 }
 
@@ -62,10 +80,6 @@ func findDistances(pipemap [][]rune) [][]int {
 		{p: start, d: 0},
 	}
 
-	isInBounds := func(p cartesian.Point) bool {
-		return p.X >= 0 && p.Y >= 0 && p.Y < len(pipemap) && p.X < len(pipemap[p.Y])
-	}
-
 	for len(queue) > 0 {
 		self := queue[0]
 		queue = queue[1:]
@@ -77,7 +91,7 @@ func findDistances(pipemap [][]rune) [][]int {
 				continue
 			}
 			next := self.p.Move(dir)
-			if !isInBounds(next) {
+			if !isInBounds(next, pipemap) {
 				continue
 			}
 			if !canTraverse(pipemap[next.Y][next.X], reverse(dir)) {
@@ -93,6 +107,54 @@ func findDistances(pipemap [][]rune) [][]int {
 	}
 
 	return distances
+}
+
+func fillOutsideEmpty(distances [][]int) [][]int {
+
+	for start, ok := findOutsideEmptySpot(distances); ok; start, ok = findOutsideEmptySpot(distances) {
+		queue := []cartesian.Point{start}
+
+		distances[start.Y][start.X] = -2
+
+		for len(queue) > 0 {
+			self := queue[0]
+			queue = queue[1:]
+
+			for _, dir := range []cartesian.Direction{cartesian.Up, cartesian.Down, cartesian.Left, cartesian.Right} {
+				next := self.Move(dir)
+				if isInBounds(next, distances) {
+					if distances[next.Y][next.X] == -1 {
+						distances[next.Y][next.X] = -2
+						queue = append(queue, next)
+					}
+				}
+			}
+		}
+	}
+	return distances
+}
+
+func findOutsideEmptySpot(distances [][]int) (cartesian.Point, bool) {
+	// left, right
+	for y, row := range distances {
+		if distances[y][0] == -1 {
+			return cartesian.Point{X: 0, Y: y}, true
+		}
+		if distances[y][len(row)-1] == -1 {
+			return cartesian.Point{X: len(row) - 1, Y: y}, true
+		}
+	}
+	// top, bottom
+	for x := range distances[0] {
+		if distances[0][x] == -1 {
+			return cartesian.Point{X: x, Y: 0}, true
+		}
+		if distances[len(distances)-1][x] == -1 {
+			return cartesian.Point{X: x, Y: len(distances) - 1}, true
+		}
+	}
+
+	return cartesian.Point{X: -1, Y: -1}, false
 }
 
 func reverse(d cartesian.Direction) cartesian.Direction {
@@ -128,4 +190,8 @@ func canTraverse(pipe rune, d cartesian.Direction) bool {
 	default:
 		return false
 	}
+}
+
+func isInBounds[T any](p cartesian.Point, m [][]T) bool {
+	return p.X >= 0 && p.Y >= 0 && p.Y < len(m) && p.X < len(m[p.Y])
 }
